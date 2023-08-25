@@ -1,16 +1,19 @@
 import Header from "../components/auth/Header";
 import Signup from "../components/auth/Signup";
+import AuthLayout from "../layout/AuthLayout";
 
 export default function SignupPage() {
+
+    const header = <Header
+        heading="Signup for an account"
+        paragraph="Already have an account? "
+        linkName="Login"
+        linkUrl="/login" />
+
     return (
-        <div className="max-w-[20rem] w-full space-y-8 bg-white border bg-opacity-20 px-6 py-4 pb-8" >
-            <Header
-                heading="Signup an account"
-                paragraph="Already have an account? "
-                linkName="Login"
-                linkUrl="/"
-            />
+
+        <AuthLayout header={header}>
             <Signup />
-        </div>
+        </AuthLayout>
     )
 }
