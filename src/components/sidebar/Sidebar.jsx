@@ -1,5 +1,6 @@
 import React from 'react'
 import { BsFillArrowLeftCircleFill } from 'react-icons/bs';
+import { Link } from 'react-router-dom';
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
@@ -17,7 +18,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             </div>
 
             <div className="flex flex-col h-full">
-                <h1 className="text-xl font-semibold mb-4 ">Taskrr</h1>
+                <Link to={'/'} className="text-xl font-semibold mb-4 ">Taskrr</Link>
                 <button className="text-blue-500 text-left" onClick={toggleSidebar}>
                     Close
                 </button>
