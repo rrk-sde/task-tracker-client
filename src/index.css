@@ -5,3 +5,11 @@
 .transition-width {
     transition: width 300ms ease-in-out;
 }
+
+/* fieldset[disabled], */
+fieldset[disabled] input,
+fieldset[disabled] textarea,
+fieldset[disabled] select {
+    background-color: #f0f0f0;
+    border: none;
+}

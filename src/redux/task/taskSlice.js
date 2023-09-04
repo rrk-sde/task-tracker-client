@@ -27,7 +27,7 @@ export const fetchTaskById = createAsyncThunk(
     'tasks/fetchTaskById',
     async (taskId, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_ENDPOINT}/${taskId}`);
+            const response = await axios.get(`${API_ENDPOINT}/tasks/${taskId}`);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

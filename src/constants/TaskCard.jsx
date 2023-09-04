@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const TaskCard = ({ task, onDelete, onEdit }) => {
 
@@ -15,12 +16,12 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
                 <p className="border rounded-full h-10 w-10 flex justify-center items-center shadow-md">
                     {task.priority}
                 </p>
-                <button
+                <Link to={'/edit/' + task.id}
                     className='border text-sm px-2 py-1 rounded-md transition delay-75 hover:bg-blue-400 bg-blue-300 hover:text-white'
                     onClick={() => onEdit(task)}
                 >
                     Edit
-                </button>
+                </Link>
                 <button
                     className='border text-sm  px-2 py-1 rounded-md transition delay-75 hover:bg-red-400 hover:text-white bg-red-300'
                     onClick={() => onDelete(task)}
