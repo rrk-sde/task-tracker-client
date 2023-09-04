@@ -1,143 +1,16 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Layout from '../layout/Layout'
 import { BiSortAlt2 } from 'react-icons/bi'
 import TaskCard from '../constants/TaskCard';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllTasks } from '../redux/task/taskSlice';
+import { deleteTaskById, fetchAllTasks, updateTasksData } from '../redux/task/taskSlice';
 import SingleTaskLoader from '../components/loader/SingleTaskLoader';
-
-
+import io from 'socket.io-client'
 
 const Home = () => {
 
-    // const tasksData = [
-    //     {
-    //         id: 1,
-    //         title: 'Task 1',
-    //         content: 'This Task Belongs to Someone loresdasdasd DSD',
-    //         createdBy: 'guest',
-    //         priority: 'P1',
-    //         status: 'todo',
-    //         dueDate: '2023-09-01',
-    //         assignedTo: 'John Doe',
-    //         labels: ['Feature', 'Bug'],
-    //         attachments: [
-    //             { name: 'document.pdf', url: 'https://example.com/document.pdf' },
-    //         ],
-    //         comments: [
-    //             { author: 'User1', text: 'This task requires immediate attention.' },
-    //         ],
-    //         estimatedTime: '2 hours',
-    //         startDate: '2023-08-25',
-    //         completionDate: '2023-08-27',
-    //         dependencies: ['Task 3', 'Task 7'],
-    //         progress: 50,
-    //     },
-    //     {
-    //         id: 2,
-    //         title: 'Task 2',
-    //         content: 'Another Task Description',
-    //         createdBy: 'admin',
-    //         priority: 'P2',
-    //         status: 'inprogress',
-    //         dueDate: '2023-09-15',
-    //         assignedTo: 'Jane Smith',
-    //         labels: ['Enhancement'],
-    //         attachments: [
-    //             { name: 'image.png', url: 'https://example.com/image.png' },
-    //         ],
-    //         comments: [
-    //             { author: 'User2', text: 'We need to clarify the requirements.' },
-    //         ],
-    //         estimatedTime: '4 hours',
-    //         startDate: '2023-08-28',
-    //         completionDate: '',
-    //         dependencies: ['Task 1'],
-    //         progress: 30,
-    //     },
-    //     {
-
-    //         title: 'Task 3',
-    //         content: 'Yet Another Task Description',
-    //         createdBy: 'user',
-    //         priority: 'P3',
-    //         status: 'completed',
-    //         dueDate: '2023-08-31',
-    //         assignedTo: 'Ella Johnson',
-    //         labels: ['Bug'],
-    //         attachments: [],
-    //         comments: [
-    //             { author: 'User3', text: 'The issue has been fixed.' },
-    //         ],
-    //         estimatedTime: '1.5 hours',
-    //         startDate: '2023-08-23',
-    //         completionDate: '2023-08-29',
-    //         dependencies: [],
-    //         progress: 100,
-    //     },
-    //     {
-    //         title: 'Task 1',
-    //         content: 'This Task Belongs to Someone sfdsafsdf asdfasfsaf zsfsafas asfsfsdfsd sdfsdf',
-    //         createdBy: 'guest',
-    //         priority: 'P1',
-    //         status: 'todo',
-    //         dueDate: '2023-09-01',
-    //         assignedTo: 'John Doe',
-    //         labels: ['Feature', 'Bug'],
-    //         attachments: [
-    //             { name: 'document.pdf', url: 'https://example.com/document.pdf' },
-    //         ],
-    //         comments: [
-    //             { author: 'User1', text: 'This task requires immediate attention.' },
-    //         ],
-    //         estimatedTime: '2 hours',
-    //         startDate: '2023-08-25',
-    //         completionDate: '2023-08-27',
-    //         dependencies: ['Task 3', 'Task 7'],
-    //         progress: 50,
-    //     },
-    //     {
-    //         title: 'Task 2',
-    //         content: 'Another Task Description',
-    //         createdBy: 'admin',
-    //         priority: 'P2',
-    //         status: 'inprogress',
-    //         dueDate: '2023-09-15',
-    //         assignedTo: 'Jane Smith',
-    //         labels: ['Enhancement'],
-    //         attachments: [
-    //             { name: 'image.png', url: 'https://example.com/image.png' },
-    //         ],
-    //         comments: [
-    //             { author: 'User2', text: 'We need to clarify the requirements.' },
-    //         ],
-    //         estimatedTime: '4 hours',
-    //         startDate: '2023-08-28',
-    //         completionDate: '',
-    //         dependencies: ['Task 1'],
-    //         progress: 30,
-    //     },
-    //     {
-    //         title: 'Task 3',
-    //         content: 'Yet Another Task Description',
-    //         createdBy: 'user',
-    //         priority: 'P1',
-    //         status: 'completed',
-    //         dueDate: '2023-08-31',
-    //         assignedTo: 'Ella Johnson',
-    //         labels: ['Bug'],
-    //         attachments: [],
-    //         comments: [
-    //             { author: 'User3', text: 'The issue has been fixed.' },
-    //         ],
-    //         estimatedTime: '1.5 hours',
-    //         startDate: '2023-08-23',
-    //         completionDate: '2023-08-29',
-    //         dependencies: [],
-    //         progress: 100,
-    //     },
-    // ];
+    const END_POINT = "http://localhost:4000"
 
     const dispatch = useDispatch()
 
@@ -145,30 +18,66 @@ const Home = () => {
     const loading = useSelector((state) => state.tasks.loading);
     const error = useSelector((state) => state.tasks.error);
 
+    // const [tasks, setTasks] = useState([]);
+    const [socket, setSocket] = useState(null);
+
     // console.log(tasks)
 
     useEffect(() => {
         dispatch(fetchAllTasks());
     }, [dispatch]);
 
-
-    // if (loading) {
-    //     return <div>Loading...</div>;
-    // }
-
-    if (error) {
-        return <div>Error: {error.message}</div>;
-    }
-
     const columns = ['to do', 'in progress', 'completed'];
 
     const onDelete = (id) => {
         console.log('onDelete', id)
+        dispatch(deleteTaskById(id))
     }
     const onEdit = (id) => {
         console.log('onEdit', id)
     }
 
+    useEffect(() => {
+        const newSocket = io(END_POINT);
+        setSocket(newSocket);
+        return () => {
+            newSocket.disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
+        // Send a request for tasks to the server
+        if (socket) {
+            socket.emit('getTasks');
+        }
+    }, [socket]);
+
+
+
+    useEffect(() => {
+        if (socket) {
+            socket.on('taskCreated', (newTask) => {
+
+                // setTasks((prevTasks) => [...prevTasks, newTask]);
+                console.log(newTask, 62)
+
+                dispatch(updateTasksData([...tasksData, newTask]));
+            });
+
+            return () => {
+
+                socket.off('taskCreated');
+            };
+        }
+    }, [socket, tasksData, dispatch]);
+
+    if (error) {
+        return <div>Error: {error.message}</div>;
+    }
+
+    // if (loading) {
+    //     return <div>Loading...</div>;
+    // }
 
     return (
         <Layout>

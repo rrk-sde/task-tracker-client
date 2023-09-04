@@ -3,59 +3,70 @@ import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import Layout from '../layout/Layout';
 import { LuDelete } from 'react-icons/lu';
+import getFormattedDate from '../utils/getFormattedDate';
+import { useDispatch, useSelector } from 'react-redux';
+import { createTask } from '../redux/task/taskSlice';
+import io from 'socket.io-client';
+
+const ENDPOINT = 'http://localhost:4000';
 
 
-const initialValues = {
-    title: '',
-    content: '',
-    // thumbnail: '',
-    priority: 'P1',
-    status: '',
-    dueDate: '',
-    labels: [],
-    // attachments: [],
-    // dependencies: [],
-    estimatedTime: '',
-    startDate: '',
-    completionDate: '',
-    progress: 0,
-};
-
-
-
-const validationSchema = Yup.object({
-    title: Yup.string().required('Required'),
-    content: Yup.string().required('Required'),
-    priority: Yup.string().required('Required'),
-    status: Yup.string().required('Required'),
-    dueDate: Yup.date().required('Required'),
-    estimatedTime: Yup.string().required('Required'),
-    startDate: Yup.date().required('Required'),
-});
-
-validationSchema.validate(initialValues).catch((error) => {
-    console.log("Validation error:", error);
-});
-
-const onSubmit = (values) => {
-    // Handle form submission here
-    console.log(values);
-};
 
 const CreateTask = () => {
-
+    const dispatch = useDispatch()
     const inputRef = useRef([]);
+    const socket = io(ENDPOINT);
+    const initialValues = {
+        title: '',
+        content: '',
+        // thumbnail: '',
+        priority: 'P1',
+        status: 'todo',
+        dueDate: '',
+        labels: [],
+        // attachments: [],
+        // dependencies: [],
+        estimatedTime: '1 Day',
+        startDate: getFormattedDate(),
+        completionDate: '',
+        progress: 0,
+    };
 
+
+
+    const validationSchema = Yup.object({
+        title: Yup.string().required('Required'),
+        content: Yup.string().required('Required'),
+        priority: Yup.string().required('Required'),
+        status: Yup.string().required('Required'),
+        // dueDate: Yup.date().required('Required'),
+        estimatedTime: Yup.string().required('Required'),
+        startDate: Yup.date().required('Required'),
+    });
+
+    validationSchema.validate(initialValues).catch((error) => {
+        console.log("Validation error:", error);
+    });
+
+
+    const onSubmit = (values) => {
+
+        console.log(values);
+        dispatch(createTask(values))
+
+        // Emit a 'createTask' event to notify the server
+        socket.emit('createTask', values);
+
+        // Clear the input field
+        // setTaskText('');
+
+    };
     // console.log(inputRef)
 
     return (
         <Layout>
-            <Formik
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                onSubmit={onSubmit}
-            >
-                {({ values }) => (
+            <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
+                {({ values, setFieldValue }) => (
                     <Form className='w-[100%] gap-[8px] flex flex-col justify-center shadow-md bg-white rounded-md px-8 py-6'>
                         {/* Title */}
                         <div className='flex flex-col gap-2'>
@@ -165,6 +176,12 @@ const CreateTask = () => {
                                                     innerRef={(el) => {
                                                         inputRef.current[index] = el;
                                                     }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.target.blur();
+                                                        }
+                                                    }}
+
                                                 />
                                                 <button
                                                     type="button"
@@ -182,7 +199,12 @@ const CreateTask = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    <div className='flex justify-center mb-auto'>
+                                    <div className='flex justify-center mb-auto gap-4'>
+                                        {values.labels.length > 3 && <div className="px-2 font-semibold py-1 bg-blue-400 rounded-md w-24  shadow-lg font-mono cursor-pointer"
+                                            onClick={() => {
+                                                setFieldValue('labels', []);
+                                            }}
+                                        >Clear All</div>}
                                         <button
                                             type="button"
                                             onClick={() => {
@@ -194,10 +216,12 @@ const CreateTask = () => {
                                                     }
                                                 }, 0);
                                             }}
-                                            className="px-2 font-semibold py-1 bg-blue-400 rounded-md  shadow-lg font-mono"
+                                            className="px-2 font-semibold py-1 bg-blue-400 rounded-md  shadow-lg font-mono cursor-pointer"
                                         >
+
                                             Add
                                         </button>
+
                                     </div>
                                     {/* ... */}
                                 </div>
@@ -269,9 +293,6 @@ const CreateTask = () => {
                                 </div>
                             </div>
                         </div>
-
-
-
 
                         <div className='flex justify-end'>
                             <button className='px-2 py-1  font-semibold shadow-lg font-mono bg-blue-400  rounded-md' type="submit">Submit</button>

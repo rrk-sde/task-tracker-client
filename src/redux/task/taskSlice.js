@@ -6,7 +6,7 @@ export const createTask = createAsyncThunk(
     'tasks/createTask',
     async (newTask, { rejectWithValue }) => {
         try {
-            const response = await axios.post(`${API_ENDPOINT}`, newTask);
+            const response = await axios.post(`${API_ENDPOINT}/tasks`, newTask);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -51,7 +51,7 @@ export const deleteTaskById = createAsyncThunk(
     'tasks/deleteTaskById',
     async (taskId, { rejectWithValue }) => {
         try {
-            await axios.delete(`${API_ENDPOINT}/${taskId}`);
+            await axios.delete(`${API_ENDPOINT}/tasks/${taskId}`);
             return taskId;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -59,9 +59,14 @@ export const deleteTaskById = createAsyncThunk(
     }
 );
 
+export const updateTasksData = (newData) => ({
+    type: 'tasks/updateTasksData',
+    payload: newData,
+});
+
 
 const initialState = {
-    task: null,
+    task: [],
     selectedTask: null,
     loading: false,
     error: null,
@@ -71,7 +76,11 @@ const initialState = {
 const tasksSlice = createSlice({
     name: 'tasks',
     initialState,
-    reducers: {},
+    reducers: {
+        updateTasksData: (state, action) => {
+            state.task = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchAllTasks.pending, (state) => {
@@ -138,6 +147,9 @@ const tasksSlice = createSlice({
             .addCase(deleteTaskById.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+            .addCase(updateTasksData, (state, action) => {
+                state.task = action.payload;
             });
     },
 });
