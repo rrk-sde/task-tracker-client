@@ -1,6 +1,7 @@
 import React from 'react';
 
 const TaskCard = ({ task, onDelete, onEdit }) => {
+
     return (
         <div className="flex gap-8 border border-amber-900 p-4 h-36 min-w-[300px] justify-between">
             <div className='flex flex-col h-full gap-2'>
